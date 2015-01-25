@@ -7,7 +7,7 @@ function net = cnnbp(net, y)
     net.L = 1/2* sum(net.e(:) .^ 2) / size(net.e, 2);
 
     %%  backprop deltas
-    net.od = net.e .* (net.o .* (1 - net.o));   %  output delta
+    net.od = net.e;   %  output delta
     net.fvd = (net.ffW' * net.od);              %  feature vector delta
     if strcmp(net.layers{n}.type, 'c')         %  only conv layers has sigm function
         net.fvd = net.fvd .* (net.fv .* (1 - net.fv));
