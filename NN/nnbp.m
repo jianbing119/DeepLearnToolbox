@@ -15,6 +15,8 @@ function nn = nnbp(nn)
         switch nn.activation_function 
             case 'sigm'
                 d_act = nn.a{i} .* (1 - nn.a{i});
+            case 'relu'
+                d_act = (nn.a{i} > 0);
             case 'tanh_opt'
                 d_act = 1.7159 * 2/3 * (1 - 1/(1.7159)^2 * nn.a{i}.^2);
         end
