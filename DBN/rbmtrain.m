@@ -13,9 +13,9 @@ function rbm = rbmtrain(rbm, x, opts)
             batch = x(kk((l - 1) * opts.batchsize + 1 : l * opts.batchsize), :);
             
             v1 = batch;
-            h1 = sigmrnd(repmat(rbm.c', opts.batchsize, 1) + v1 * rbm.W');
-            v2 = sigmrnd(repmat(rbm.b', opts.batchsize, 1) + h1 * rbm.W);
-            h2 = sigm(repmat(rbm.c', opts.batchsize, 1) + v2 * rbm.W');
+            h1 = sigm(repmat(rbm.c', opts.batchsize, 1) + v1 * rbm.W');
+            v2 = sigm(repmat(rbm.b', opts.batchsize, 1) + rndp(h1) * rbm.W);
+            h2 = sigm(repmat(rbm.c', opts.batchsize, 1) + rndp(v2) * rbm.W');
 
             c1 = h1' * v1;
             c2 = h2' * v2;
