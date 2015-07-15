@@ -87,24 +87,32 @@ for i = 1 : numepochs
         break
     end
     
-    if patience > 0
-        if loss.val.e(end) < best_val_loss
+    if opts.validation == 1
+        if patience > 0
+            % if validation loss improves above threshold
             if loss.val.e(end) < best_val_loss * opts.improve_threshold
+                % increase patience
                 patience = i + opts.patience_increase;
                 disp(['Increased patience to ' num2str(patience) '.']);
             end
+
+            % if have reached patience, then stop early
+            if i >= patience
+                disp('Stopping training early, because patience reached.');
+                break
+            end
+        end
+    
+        % if validation loss is smaller than before then record best network
+        if loss.val.e(end) < best_val_loss
             best_val_loss = loss.val.e(end);
             best_nn = nn;
-        end
-        
-        if i > patience
-            disp('Stopping training early, because patience reached.');
-            break
         end
     end
 end
 
-if patience > 0
+% if best_nn has value, then return that
+if exist('best_nn', 'var')
     nn = best_nn;
 end
 end
