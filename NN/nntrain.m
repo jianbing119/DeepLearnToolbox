@@ -23,6 +23,15 @@ if isfield(opts,'plot') && opts.plot == 1
     fhandle = figure();
 end
 
+best_val_loss = Inf;
+patience = 0;
+if isfield(opts,'patience') && opts.patience > 0
+    assert(opts.validation == 1, 'Early stopping can only be used with validation');
+    assert(isfield(opts,'patience_increase'), 'Early stopping missing patiance_increase parameter');
+    assert(isfield(opts,'improve_threshold'), 'Early stopping missing improve_threshold parameter');
+    patience = opts.patience;
+end
+
 m = size(train_x, 1);
 
 batchsize = opts.batchsize;
@@ -72,6 +81,30 @@ for i = 1 : numepochs
         
     disp(['epoch ' num2str(i) '/' num2str(opts.numepochs) '. Took ' num2str(t) ' seconds' '. Mini-batch mean squared error on training set is ' num2str(mean(L((n-numbatches):(n-1)))) str_perf]);
     nn.learningRate = nn.learningRate * nn.scaling_learningRate;
-end
+
+    if isnan(loss.train.e(end))
+        disp('Stopping early, because training set loss is NaN.');
+        break
+    end
+    
+    if patience > 0
+        if loss.val.e(end) < best_val_loss
+            if loss.val.e(end) < best_val_loss * opts.improve_threshold
+                patience = i + opts.patience_increase;
+                disp(['Increased patience to ' num2str(patience) '.']);
+            end
+            best_val_loss = loss.val.e(end);
+            best_nn = nn;
+        end
+        
+        if i > patience
+            disp('Stopping training early, because patience reached.');
+            break
+        end
+    end
 end
 
+if patience > 0
+    nn = best_nn;
+end
+end
